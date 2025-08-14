@@ -1,0 +1,306 @@
+{
+  "name": "multiagent",
+  "nodes": [
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a professional study planner. \nBased on each subjects difficulty level- {{ $json.fields.Subjects }}, the task has been given in respective order {{ $json.fields.Tasks }}.\nMake a weekly simple study plan to complete evrything effectively."
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        336,
+        208
+      ],
+      "id": "ccfa7578-32f3-4231-b1c3-6eec24e225c6",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "SS8hz7vUySzE2mCt",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b1b28b48-3e66-4ca2-94d6-c2555512ede9",
+      "name": "Telegram Trigger",
+      "webhookId": "5cf5e177-7af6-43e3-8db0-aa27748821b0",
+      "credentials": {
+        "telegramApi": {
+          "id": "t4j3r96iP4g3AUg7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "={{ $json.message.from.id }}",
+        "message": "📚 Let's make your study plan for this week! ",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Subject 1 and difficulty"
+            },
+            {
+              "fieldLabel": "Subject 2 and difficulty"
+            },
+            {
+              "fieldLabel": "Subject 3 and difficulty"
+            },
+            {
+              "fieldLabel": "Subject 1 Task"
+            },
+            {
+              "fieldLabel": "Subject 2 Task"
+            },
+            {
+              "fieldLabel": "Subject 3 Task"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        0
+      ],
+      "id": "13cbdeb8-2e3a-40f5-8298-575a27062f22",
+      "name": "Send message and wait for response",
+      "webhookId": "94b41661-e052-49bd-8d72-cb8d3f499301",
+      "credentials": {
+        "telegramApi": {
+          "id": "t4j3r96iP4g3AUg7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appZUmlATvd0zRXal",
+          "mode": "list",
+          "cachedResultName": "Untitled Base",
+          "cachedResultUrl": "https://airtable.com/appZUmlATvd0zRXal"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblGcjNFyz5tu8nvO",
+          "mode": "list",
+          "cachedResultName": "Study",
+          "cachedResultUrl": "https://airtable.com/appZUmlATvd0zRXal/tblGcjNFyz5tu8nvO"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Subjects": "={{ $json.data['Subject 1 and difficulty'] }}\n{{ $json.data['Subject 2 and difficulty'] }}\n{{ $json.data['Subject 3 and difficulty'] }}",
+            "Tasks": "={{ $json.data['Subject 1 Task'] }}\n{{ $json.data['Subject 2 Task'] }}\n{{ $json.data['Subject 3 Task'] }}"
+          },
+          "matchingColumns": [
+            "Subjects",
+            "Tasks"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Subjects",
+              "displayName": "Subjects",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tasks",
+              "displayName": "Tasks",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        496,
+        0
+      ],
+      "id": "c4fcdc80-2d1f-41a1-ac76-5443eee020dd",
+      "name": "Create or update a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "4v7Mmx0ct4aoZZj1",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableTokenApi",
+        "baseId": {
+          "__rl": true,
+          "value": "https://airtable.com/appZUmlATvd0zRXal/tblGcjNFyz5tu8nvO/viwUrg2lwQJUmu0le?blocks=hide",
+          "mode": "url"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "https://airtable.com/appZUmlATvd0zRXal/tblGcjNFyz5tu8nvO/viwUrg2lwQJUmu0le?blocks=hide",
+          "mode": "url"
+        },
+        "triggerField": "Subjects",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        32,
+        208
+      ],
+      "id": "fb8dbd24-b852-45af-94c0-be0285c0cbd3",
+      "name": "Airtable Trigger",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "4v7Mmx0ct4aoZZj1",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "8153662488",
+        "text": "={{ $json.message.content.study_plan.weekly_plan.Monday }}\n{{ $json.message.content.study_plan.weekly_plan.Tuesday }}\n{{ $json.message.content.study_plan.weekly_plan.Wednesday }}\n{{ $json.message.content.study_plan.weekly_plan.Thursday }}\n{{ $json.message.content.study_plan.weekly_plan.Friday }}\n{{ $json.message.content.study_plan.weekly_plan.Saturday }}\n{{ $json.message.content.study_plan.weekly_plan.Sunday }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        688,
+        208
+      ],
+      "id": "6ba06d9c-1750-4621-be70-959852a7af84",
+      "name": "Send a text message",
+      "webhookId": "901e8889-4737-4897-b3d2-5a6b49d9336e",
+      "credentials": {
+        "telegramApi": {
+          "id": "t4j3r96iP4g3AUg7",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4afb65d5-bbb6-4aa4-b9fe-ec186473c85b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "87c7940c26d8c10ae57a7c3e858db0619d3ce13534d588caef972527243fddc6"
+  },
+  "id": "glhnMZTxLobVZTj5",
+  "tags": []
+}  
